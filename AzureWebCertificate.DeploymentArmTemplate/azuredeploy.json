@@ -1,0 +1,39 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "certificatePrefixName": {
+      "type": "string"
+    },
+    "certificatePfxBase64": {
+      "type": "securestring"
+    },
+    "certificatePfxPassword": {
+      "type": "securestring"
+    }
+  },
+  "variables": {
+    "certificateName": "[concat(parameters('certificatePrefixName'), uniqueString(resourceGroup().id))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[variables('certificateName')]",
+      "type": "Microsoft.Web/certificates",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "pfxBlob": "[parameters('certificatePfxBase64')]",
+        "password": "[parameters('certificatePfxPassword')]"
+      },
+      "tags": {
+        "displayName": "Certificate"
+      }
+    }
+  ],
+  "outputs": {
+    "certificateThumbprint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Web/certificates', variables('certificateName')), providers('Microsoft.Web', 'certificates').apiVersions[0]).thumbprint]"
+    }
+  }
+}
